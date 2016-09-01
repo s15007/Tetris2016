@@ -2,39 +2,44 @@ import pyglet
 
 import gametypes
 
-
+""" Global values"""
 WIDTH = 800
 HEIGHT = 600
-BOARD_X = 445
-BOARD_Y = 13
+BOARD_X = 200
+BOARD_Y = 50
 GRID_WIDTH = 10
 GRID_HEIGHT = 20
-BLOCK_SIZE = 24
+BLOCK_SIZE = 25
+QUEUE_SET = 2
 
 window = pyglet.window.Window(WIDTH, HEIGHT)
 window.set_vsync(False)
 
-###### load resources ######
+""" load resources """
 pyglet.resource.path = ['res']
-backgroundImage = pyglet.resource.image('okyztfpxnpl.jpg')
-blocksImage = pyglet.resource.image('block.png')
-gametypes.TetrominoType.class_init(blocksImage, BLOCK_SIZE)
+pyglet.resource.reindex()
+backgroundImage = pyglet.resource.image('background.png')
+blocksImage = pyglet.resource.image('blocks.png')
+dummyBlockImage = pyglet.resource.image('ghost_blocks.png')
+gametypes.TetrominoType.class_init(blocksImage, dummyBlockImage, BLOCK_SIZE)
 
-###### init game state ######
-board = gametypes.Board(BOARD_X, BOARD_Y, GRID_WIDTH, GRID_HEIGHT, BLOCK_SIZE)
-infoDisplay = gametypes.InfoDisplay(window)
-input = gametypes.Input()
-game = gametypes.Game(board, infoDisplay, input, backgroundImage)
+""" init game state """
+queue = gametypes.NextTetrominoQueue(500, 200, BLOCK_SIZE, QUEUE_SET)
+holder = gametypes.Holder(50, 400, BLOCK_SIZE)
+board = gametypes.Board(BOARD_X, BOARD_Y, GRID_WIDTH, GRID_HEIGHT, BLOCK_SIZE, queue, holder)
+info_display = gametypes.InfoDisplay(window, 55, 332, 55, 282)
+input_processor = gametypes.InputProcessor()
+game = gametypes.Game(board, info_display, input_processor, backgroundImage, queue, holder)
 
 
 @window.event
 def on_key_press(symbol, modifiers):
-    input.process_keypress(symbol, modifiers)
+    input_processor.process_keypress(symbol, modifiers)
 
 
 @window.event
 def on_text_motion(motion):
-    input.process_text_motion(motion)
+    input_processor.process_text_motion(motion)
 
 
 @window.event
